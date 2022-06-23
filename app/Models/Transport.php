@@ -5,10 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Activity extends Model
+class Transport extends Model
 {
     use HasFactory;
-    protected $table = 'activity';
+    protected $table = 'trasnsport_image';
     protected $guarded = [];
 
     public function region_name()
@@ -35,5 +35,4 @@ class Activity extends Model
     {
         return $this->hasOne('App\Models\Village','id','village');
     }
-
 }

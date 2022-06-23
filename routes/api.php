@@ -14,6 +14,8 @@ use App\Http\Controllers\Api\TourItinerary\TourItineraryController;
 use App\Http\Controllers\Api\ActivityCategory\ActivityCategoryController;
 use App\Http\Controllers\Api\ActivitySubCategory\ActivitySubCategoryController;
 use App\Http\Controllers\Api\Activity\ActivityController;
+use App\Http\Controllers\Api\ServiceProvider\ServiceProviderController;
+use App\Http\Controllers\Api\Transport\TransportController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -28,6 +30,8 @@ use App\Http\Controllers\Api\Activity\ActivityController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::post('get-token',[LoginController::class, 'token']);
 
 Route::post('/admin/login', [LoginController::class, 'login']);
 
@@ -241,4 +245,38 @@ Route::group(['middleware' => ['jwt.verify']], function() {
       Route::post('/admin/activity/image-upload',[ActivityController::class, 'imageUpload']);
       Route::get('/admin/activity/image-listing/{id}',[ActivityController::class, 'imageListing']);
       Route::get('/admin/activity/image-delete/{id}',[ActivityController::class, 'imageDelete']);
+
+      // activity-video
+      Route::post('/admin/activity/video-upload',[ActivityController::class, 'videoUpload']);
+      Route::get('/admin/activity/video-listing/{id}',[ActivityController::class, 'videoListing']);
+      Route::get('/admin/activity/video-delete/{id}',[ActivityController::class, 'videoDelete']);
+
+
+      // service-provider
+      Route::post('/admin/service-provider/add',[ServiceProviderController::class,'add']);
+      Route::get('/admin/service-provider/listing',[ServiceProviderController::class,'listing']);
+      Route::get('/admin/service-provider/delete/{id}',[ServiceProviderController::class,'delete']);
+      Route::get('/admin/service-provider/status/{id}',[ServiceProviderController::class,'status']);
+      Route::get('/admin/service-provider/edit/{id}',[ServiceProviderController::class,'edit']);
+      Route::get('/admin/service-provider/update',[ServiceProviderController::class,'update']);
+
+      // trasportation
+      Route::get('/admin/transportation-add-view',[TransportController::class,'addView']);
+      Route::post('/admin/transportation-add',[TransportController::class,'add']);
+      Route::any('/admin/transportation-list',[TransportController::class,'list']);
+      Route::get('/admin/transportation-delete/{id}',[TransportController::class,'delete']);
+      Route::get('/admin/transportation-edit/{id}',[TransportController::class,'edit']);
+      Route::post('/admin/transportation-update',[TransportController::class,'update']);
+
+      // trasportation image
+      Route::post('/admin/transportation/image-add',[TransportController::class,'imageAdd']);
+      Route::get('/admin/transportation/image-listing/{id}',[TransportController::class,'imageListing']);
+      Route::get('/admin/transportation/image-delete/{id}',[TransportController::class,'imageDelete']);
+
+      // trasportation video
+      Route::post('/admin/transportation/video-add',[TransportController::class,'videoAdd']);
+      Route::get('/admin/transportation/video-listing/{id}',[TransportController::class,'videoListing']);
+      Route::get('/admin/transportation/video-delete/{id}',[TransportController::class,'videoDelete']);
+
+
 });
