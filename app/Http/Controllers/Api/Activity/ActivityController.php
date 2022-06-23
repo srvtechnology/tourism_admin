@@ -249,7 +249,7 @@ class ActivityController extends Controller
 
 
          $response['success'] = true;
-         $response['data'] = $data;   
+         $response['datas'] = $data;   
          return Response::json($response);
         
         }catch(\Exception $e){
