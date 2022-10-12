@@ -11,4 +11,11 @@ class ActivityCategory extends Model
 
     protected $table = 'activity_category';
     protected $guarded = [];
+
+    public function subcategory()
+    {
+        return $this->hasMany('App\Models\ActivitySubCategory','category_id','id');
+    }
+
 }
+

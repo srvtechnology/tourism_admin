@@ -18,7 +18,8 @@ use App\Models\Region;
 use App\Models\Activity;
 use App\Models\ActivityImage;
 use App\Models\ActivityVideo;
-
+use App\Models\ActivityContact;
+use App\Models\Review;
 class ActivityController extends Controller
 {
     public function getSubCategory(Request $request)
@@ -59,8 +60,11 @@ class ActivityController extends Controller
         
         try{
          $dungkhag = Dungkhag::where('dzongkhag_id',$request->dzongkhag_id)->get();
-         $response['success'] = true;
+         $gewog = Gewog::where('dzongkhag_id',$request->dzongkhag_id)->get();
+         $response['gewog'] = $gewog;
+         $response['village'] = Village::where('dzongkhag_id',$request->dzongkhag_id)->get();   
          $response['dungkhag'] = $dungkhag;   
+         $response['success'] = true;
          return Response::json($response);
         
         }catch(\Exception $e){
@@ -127,9 +131,9 @@ class ActivityController extends Controller
         $validator = Validator::make($request->all(), [
             'region_id' => 'required',
             'dzongkhag_id' => 'required',
-            'dungkhag_id'=>'required',
-            'gewog_id'=>'required',
-            'village'=>'required',
+            // 'dungkhag_id'=>'required',
+            // 'gewog_id'=>'required',
+            // 'village'=>'required',
             'name'=>'required',
             'category_id'=>'required',
             'subcategory_id'=>'required',
@@ -157,7 +161,8 @@ class ActivityController extends Controller
             'amenities'=>'required',
             'equipments'=>'required',
 
-
+            // 'header_image'=>'required',
+            // 'teaser_image'=>'required',
         ]);
 
         //Send failed response if request is not valid
@@ -195,6 +200,23 @@ class ActivityController extends Controller
 
         $ins['amenities'] = $request->amenities;
         $ins['equipments'] = $request->equipments;
+
+
+        if ($request->hasFile('header_image'))
+        {
+             $header_image = $request->header_image;
+             $filename = time() . '-' . rand(1000, 9999) . '.' . $header_image->getClientOriginalExtension();
+             $header_image->move("storage/app/public/activity_image",$filename);
+             $ins['header_image'] = $filename;
+        }
+
+        if ($request->hasFile('teaser_image'))
+        {
+             $teaser_image = $request->teaser_image;
+             $filename = time() . '-' . rand(1000, 9999) . '.' . $teaser_image->getClientOriginalExtension();
+             $teaser_image->move("storage/app/public/activity_image",$filename);
+             $ins['teaser_image'] = $filename;
+        }
         
         Activity::create($ins);
         $response['success'] = true;
@@ -216,7 +238,7 @@ class ActivityController extends Controller
         $response = [];
         
         try{
-         $data = Activity::where('status','!=','D')->with('region_name','dungkhag_name','dzongkhag_name','gewog_name','Village_name');
+         $data = Activity::where('status','!=','D')->with('region_name','dungkhag_name','dzongkhag_name','gewog_name','Village_name','category_name','subcategory_name');
          if (@$request->category_id) {
              $data = $data->where('category_id',$request->category_id);
              $response['subcategory'] = ActivitySubCategory::where('category_id',$request->category_id)->get();
@@ -235,9 +257,9 @@ class ActivityController extends Controller
               $response['dungkhag'] = Dungkhag::where('dzongkhag_id',$request->dzongkhag_id)->get();
          }
 
-         if (@$request->dzongkhag_id) {
-              $data = $data->where('dzongkhag_id',$request->dzongkhag_id);
-              $response['gewog'] = Gewog::where('dungkhag_id',@$request->dzongkhag_id)->get();
+         if (@$request->dungkhag_id) {
+              $data = $data->where('dungkhag_id',$request->dungkhag_id);
+              $response['gewog'] = Gewog::where('dungkhag_id',@$request->dungkhag_id)->get();
          }
 
          if (@$request->gewog_id) {
@@ -250,6 +272,8 @@ class ActivityController extends Controller
 
          $response['success'] = true;
          $response['datas'] = $data;   
+         $response['regions'] = Region::get();
+         $response['category'] = ActivityCategory::where('status','!=','D')->get();
          return Response::json($response);
         
         }catch(\Exception $e){
@@ -298,9 +322,9 @@ class ActivityController extends Controller
         $validator = Validator::make($request->all(), [
             'region_id' => 'required',
             'dzongkhag_id' => 'required',
-            'dungkhag_id'=>'required',
-            'gewog_id'=>'required',
-            'village'=>'required',
+            // 'dungkhag_id'=>'required',
+            // 'gewog_id'=>'required',
+            // 'village'=>'required',
             'name'=>'required',
             'category_id'=>'required',
             'subcategory_id'=>'required',
@@ -366,6 +390,23 @@ class ActivityController extends Controller
 
         $ins['amenities'] = $request->amenities;
         $ins['equipments'] = $request->equipments;
+
+
+        if ($request->hasFile('header_image'))
+        {
+             $header_image = $request->header_image;
+             $filename = time() . '-' . rand(1000, 9999) . '.' . $header_image->getClientOriginalExtension();
+             $header_image->move("storage/app/public/header_image",$filename);
+             $ins['header_image'] = $filename;
+        }
+
+        if ($request->hasFile('teaser_image'))
+        {
+             $teaser_image = $request->teaser_image;
+             $filename = time() . '-' . rand(1000, 9999) . '.' . $teaser_image->getClientOriginalExtension();
+             $teaser_image->move("storage/app/public/teaser_image",$filename);
+             $ins['teaser_image'] = $filename;
+        }
         
         Activity::where('id',$request->id)->update($ins);
         $response['success'] = true;
@@ -523,6 +564,267 @@ class ActivityController extends Controller
             $response['error'] = $e->getMessage();
             return Response::json($response);
         } 
+    }
+
+
+    public function frontActivity()
+    {
+        $response = [];
+        
+        try{
+         $response['success'] = true;               
+         $response['data'] = Activity::with('images')->where('status','!=','D')->with('region_name','dungkhag_name','dzongkhag_name','gewog_name','Village_name','category_name','subcategory_name')->get();
+         $response['image_link'] = 'http://services.tourism.gov.bt/storage/app/public/activity_image/';
+         return $response;
+
+         }catch(\Exception $e){
+            $response['error'] = $e->getMessage();
+            return Response::json($response);
+        } 
+    }
+
+
+    public function frontActivityDetails($id)
+    {
+        $response = [];
+        
+        try{
+         $response['success'] = true;               
+         $response['data'] = Activity::with('images','videos')->where('status','!=','D')->with('region_name','dungkhag_name','dzongkhag_name','gewog_name','Village_name','category_name','subcategory_name')->where('id',$id)->first();
+
+
+         // review
+         $response['reviews'] = Review::where('activity_id',$id)->get();
+         $response['total_review_count'] = Review::where('activity_id',$id)->count();
+         $response['avg_review'] = Review::where('activity_id',$id)->avg('rating');
+         $response['one_star'] = Review::where('activity_id',$id)->where('rating',1)->count();
+         $response['two_star'] = Review::where('activity_id',$id)->where('rating',2)->count();
+         $response['three_star'] = Review::where('activity_id',$id)->where('rating',3)->count();
+         $response['four_star'] = Review::where('activity_id',$id)->where('rating',4)->count();
+         $response['five_star'] = Review::where('activity_id',$id)->where('rating',5)->count();
+
+         
+         $response['image_link'] = 'http://services.tourism.gov.bt/storage/app/public/activity_image/';
+         $response['video_link'] = 'http://services.tourism.gov.bt/storage/app/public/activity_video/';
+         return $response;
+
+         }catch(\Exception $e){
+            $response['error'] = $e->getMessage();
+            return Response::json($response);
+        }
+    }
+
+
+    public function contactListing($id)
+    {
+        $response = [];
+        try{
+         $data = ActivityContact::where('activity_id',$id)->get();
+         $response['success'] = true;
+         $response['data'] = $data;   
+         return Response::json($response);
+        
+        }catch(\Exception $e){
+            $response['error'] = $e->getMessage();
+            return Response::json($response);
+        } 
+    }
+
+
+    public function contactAdd(Request $request)
+    {
+        $response = [];
+        try{
+        //valid credential
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'phone' => 'required',
+            'email' => 'required',
+            'activity_id'=>'required',
+         ]);  
+
+        //Send failed response if request is not valid
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->messages()], 200);
+        }
+
+        $ins = [];
+        $ins['activity_id'] = $request->activity_id;
+        $ins['name'] = $request->name;
+        $ins['phone'] = $request->phone;
+        $ins['mobile'] = $request->mobile;
+        $ins['email'] = $request->email;
+        $ins['whatsapp'] = $request->whatsapp;
+        
+        ActivityContact::create($ins);
+        $response['success'] = true;
+        $response['message'] = 'Contact inserted Successfully';
+        return Response::json($response);
+
+
+        }catch(\Exception $e){
+            $response['error'] = $e->getMessage();
+            return Response::json($response);
+        }
+    }
+
+
+    public function contactEdit($id)
+    {
+        $response = [];
+        try{
+         $data = ActivityContact::where('id',$id)->first();
+         $response['success'] = true;
+         $response['data'] = $data;   
+         return Response::json($response);
+        
+        }catch(\Exception $e){
+            $response['error'] = $e->getMessage();
+            return Response::json($response);
+        } 
+    }
+
+
+    public function contactUpdate(Request $request)
+    {
+        $response = [];
+        try{
+        //valid credential
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'phone' => 'required',
+            'email' => 'required',
+            'id'=>'required',
+         ]);  
+
+        //Send failed response if request is not valid
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->messages()], 200);
+        }
+
+        $ins = [];
+        
+        $ins['name'] = $request->name;
+        $ins['phone'] = $request->phone;
+        $ins['mobile'] = $request->mobile;
+        $ins['email'] = $request->email;
+        $ins['whatsapp'] = $request->whatsapp;
+        
+        ActivityContact::where('id',$request->id)->update($ins);
+        $response['success'] = true;
+        $response['message'] = 'Contact inserted Successfully';
+        return Response::json($response);
+
+
+        }catch(\Exception $e){
+            $response['error'] = $e->getMessage();
+            return Response::json($response);
+        }
+    }
+
+
+    public function contactDelete($id)
+    {
+        $response = [];
+        try{
+            ActivityContact::where('id',$id)->delete();
+            $response['success'] = true;
+            $response['message'] = 'Contact deleted Successfully';
+            return Response::json($response);
+        
+        }catch(\Exception $e){
+            $response['error'] = $e->getMessage();
+            return Response::json($response);
+        }    
+    }
+
+
+    public function categoryFetch()
+    {
+        $response = [];
+        try{
+         $data = ActivityCategory::where('status','!=','D')->with('subcategory')->get();
+         $response['success'] = true;
+         $response['data'] = $data;   
+         return Response::json($response);
+        
+        }catch(\Exception $e){
+            $response['error'] = $e->getMessage();
+            return Response::json($response);
+        }
+    }
+
+
+
+    public function subCategoryActivityFetch($id)
+    {
+        $response = [];
+        
+        try{
+         $response['success'] = true;               
+         $response['data'] = Activity::where('subcategory_id',$id)->with('images','videos')->where('status','!=','D')->with('region_name','dungkhag_name','dzongkhag_name','gewog_name','Village_name','category_name','subcategory_name')->get();
+         $response['image_link'] = 'http://services.tourism.gov.bt/storage/app/public/activity_image/';
+         $response['video_link'] = 'http://services.tourism.gov.bt/storage/app/public/activity_video/';
+         return $response;
+
+         }catch(\Exception $e){
+            $response['error'] = $e->getMessage();
+            return Response::json($response);
+        } 
+    }
+
+
+    public function categoryActivityFetch($id)
+    {
+        $response = [];
+        
+        try{
+         $response['success'] = true;               
+         $response['data'] = Activity::where('category_id',$id)->with('images','videos')->where('status','!=','D')->with('region_name','dungkhag_name','dzongkhag_name','gewog_name','Village_name','category_name','subcategory_name')->get();
+         $response['image_link'] = 'http://services.tourism.gov.bt/storage/app/public/activity_image/';
+         $response['video_link'] = 'http://services.tourism.gov.bt/storage/app/public/activity_video/';
+         return $response;
+
+         }catch(\Exception $e){
+            $response['error'] = $e->getMessage();
+            return Response::json($response);
+        }
+    }
+
+
+    public function regionActivityFetch($id)
+    {
+        $response = [];
+        
+        try{
+         $response['success'] = true;               
+         $response['data'] = Activity::where('region_id',$id)->with('images','videos')->where('status','!=','D')->with('region_name','dungkhag_name','dzongkhag_name','gewog_name','Village_name','category_name','subcategory_name')->get();
+         $response['image_link'] = 'http://services.tourism.gov.bt/storage/app/public/activity_image/';
+         $response['video_link'] = 'http://services.tourism.gov.bt/storage/app/public/activity_video/';
+         return $response;
+
+         }catch(\Exception $e){
+            $response['error'] = $e->getMessage();
+            return Response::json($response);
+        }
+    }
+
+
+    public function dzonkhagActivityFetch($id)
+    {
+        $response = [];
+        
+        try{
+         $response['success'] = true;               
+         $response['data'] = Activity::where('dzongkhag_id',$id)->with('images','videos')->where('status','!=','D')->with('region_name','dungkhag_name','dzongkhag_name','gewog_name','Village_name','category_name','subcategory_name')->get();
+         $response['image_link'] = 'http://services.tourism.gov.bt/storage/app/public/activity_image/';
+         $response['video_link'] = 'http://services.tourism.gov.bt/storage/app/public/activity_video/';
+         return $response;
+
+         }catch(\Exception $e){
+            $response['error'] = $e->getMessage();
+            return Response::json($response);
+        }
     }
 
 

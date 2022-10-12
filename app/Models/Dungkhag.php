@@ -10,4 +10,9 @@ class Dungkhag extends Model
     use HasFactory;
     protected $table = 'dungkhag';
     protected $guarded = [];
+
+    public function dzongkhag_name()
+    {
+        return $this->hasOne('App\Models\Dzongkhag','id','dzongkhag_id');
+    }
 }

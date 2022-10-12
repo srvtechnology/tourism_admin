@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Validator;
-
+use Carbon\Carbon;
 class LoginController extends Controller
 {
    
@@ -43,11 +43,11 @@ class LoginController extends Controller
                 ], 400);
             }
 
-            $myTTL = 250; //minutes
+            // $myTTL = 250; //minutes
 
-            JWTAuth::factory()->setTTL($myTTL);
+            // JWTAuth::factory()->setTTL($myTTL);
 
-            if (! $token = JWTAuth::attempt($credentials)) {
+            if (! $token = JWTAuth::attempt($credentials,['exp' => Carbon::now()->addMonths(12)->timestamp])) {
                 return response()->json([
                 	'success' => false,
                 	'message' => 'Login credentials are invalid.',
@@ -65,6 +65,7 @@ class LoginController extends Controller
         return response()->json([
             'success' => true,
             'token' => $token,
+            'user_detail'=>auth()->user()
         ]);
     }
 
@@ -98,36 +99,7 @@ class LoginController extends Controller
         }
     }
 
-    public function token(Request $request)
-    {
-        $data = array(
-         "orderId"=> "Order0001",
-         "orderAmount"=>1,
-         "orderCurrency"=>"INR"
-        );
-    
-  $post_data = json_encode($data);
-    
-  // Prepare new cURL resource
-  $crl = curl_init('https://test.cashfree.com/api/v2/cftoken/order');
-  curl_setopt($crl, CURLOPT_RETURNTRANSFER, true);
-  curl_setopt($crl, CURLINFO_HEADER_OUT, true);
-  curl_setopt($crl, CURLOPT_POST, true);
-  curl_setopt($crl, CURLOPT_POSTFIELDS, $post_data);
-    
-  // Set HTTP Header for POST request 
-  curl_setopt($crl, CURLOPT_HTTPHEADER, array(
-      'Content-Type: application/json',
-      
-        'x-client-id:  179449cc8c9f1aea3d67e70914944971',
-        'x-client-secret: 513d0abb3cb06085fed7f6fc85364afe5990c05a'
-  ));
-    
-  // Submit the POST request
-  $result = curl_exec($crl);
-  curl_close($crl);
-  return $result;
-    }
+
 
     
 }

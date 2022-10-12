@@ -12,5 +12,13 @@ class Gewog extends Model
     protected $table = 'gewog';
     protected $guarded = [];
 
-   
+    public function dzongkhag_name()
+    {
+        return $this->hasOne('App\Models\Dzongkhag','id','dzongkhag_id');
+    }
+
+    public function dunkhag_name()
+    {
+        return $this->hasOne('App\Models\Dungkhag','id','dungkhag_id');
+    }
 }

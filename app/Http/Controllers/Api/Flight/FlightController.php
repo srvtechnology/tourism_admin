@@ -129,7 +129,7 @@ class FlightController extends Controller
 
     public function update(Request $request)
     {
-    	       $response = [];
+    	$response = [];
     	try{
     	//valid credential
         $validator = Validator::make($request->all(), [

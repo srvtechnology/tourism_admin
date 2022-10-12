@@ -11,5 +11,8 @@ class Region extends Model
     protected $table = 'regions';
     protected $guarded = [];
 
-    
+    public function dzongkhags()
+    {
+        return $this->hasMany('App\Models\Dzongkhag','region_id','id');
+    }
 }

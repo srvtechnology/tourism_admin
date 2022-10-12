@@ -11,5 +11,9 @@ class Dzongkhag extends Model
     protected $table = 'dzongkhag';
     protected $guarded = [];
 
+    public function region_name()
+    {
+        return $this->hasOne('App\Models\Region','id','region_id');
+    }
     
 }

@@ -16,6 +16,25 @@ use App\Http\Controllers\Api\ActivitySubCategory\ActivitySubCategoryController;
 use App\Http\Controllers\Api\Activity\ActivityController;
 use App\Http\Controllers\Api\ServiceProvider\ServiceProviderController;
 use App\Http\Controllers\Api\Transport\TransportController;
+use App\Http\Controllers\Api\CmsCategory\CmsCategoryController;
+use App\Http\Controllers\Api\CmsSubCategory\CmsSubCategoryController;
+use App\Http\Controllers\Api\CmsSubSubCategory\CmsSubSubCategoryController;
+use App\Http\Controllers\Api\Cms\CmsController;
+use App\Http\Controllers\Api\TopDestination\TopDestinationController;
+use App\Http\Controllers\Api\Region\RegionController;
+use App\Http\Controllers\Api\Dzongkhag\DzongkhagController;
+use App\Http\Controllers\Api\Dunkhag\DunkhagController;
+use App\Http\Controllers\Api\Gewog\GewogController;
+use App\Http\Controllers\Api\Village\VillageController;
+use App\Http\Controllers\Api\Theme\ThemeController;
+use App\Http\Controllers\Api\Attraction\AttractionCategory;
+use App\Http\Controllers\Api\Poi\PoiController;
+use App\Http\Controllers\Api\Header\HeaderImage;
+use App\Http\Controllers\Api\Event\EventCategoryControllroller;
+use App\Http\Controllers\Api\Review\ReviewController;
+use App\Http\Controllers\Api\Separate\SeparateController;
+use App\Http\Controllers\Api\UserManagement\UserManagementController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -33,7 +52,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('get-token',[LoginController::class, 'token']);
 
-Route::post('/admin/login', [LoginController::class, 'login']);
+Route::post('/admin/login', [LoginController::class, 'login'])->middleware('cors');
+// activity/////////////////////////////////////////////////////
+Route::any('/admin/activity/listing',[ActivityController::class, 'listing']);
+Route::get('/admin/activity/image-listing/{id}',[ActivityController::class, 'imageListing']);
+Route::get('/admin/activity/video-listing/{id}',[ActivityController::class, 'videoListing']);
 
 Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('/admin/test', [LoginController::class, 'test']);
@@ -236,20 +259,22 @@ Route::group(['middleware' => ['jwt.verify']], function() {
 
       Route::get('/admin/activity/add-view',[ActivityController::class, 'addView']);
       Route::post('/admin/activity/add',[ActivityController::class, 'add']);
-      Route::any('/admin/activity/listing',[ActivityController::class, 'listing']);
+      
       Route::get('/admin/activity/delete/{id}',[ActivityController::class, 'delete']);
       Route::get('/admin/activity/edit/{id}',[ActivityController::class, 'edit']);
       Route::post('/admin/activity/update',[ActivityController::class, 'update']);
 
       // activity-image
       Route::post('/admin/activity/image-upload',[ActivityController::class, 'imageUpload']);
-      Route::get('/admin/activity/image-listing/{id}',[ActivityController::class, 'imageListing']);
+      
       Route::get('/admin/activity/image-delete/{id}',[ActivityController::class, 'imageDelete']);
 
       // activity-video
       Route::post('/admin/activity/video-upload',[ActivityController::class, 'videoUpload']);
-      Route::get('/admin/activity/video-listing/{id}',[ActivityController::class, 'videoListing']);
+      
       Route::get('/admin/activity/video-delete/{id}',[ActivityController::class, 'videoDelete']);
+
+      
 
 
       // service-provider
@@ -278,5 +303,250 @@ Route::group(['middleware' => ['jwt.verify']], function() {
       Route::get('/admin/transportation/video-listing/{id}',[TransportController::class,'videoListing']);
       Route::get('/admin/transportation/video-delete/{id}',[TransportController::class,'videoDelete']);
 
+      // cms-category
+      Route::post('/admin/cms-category/add',[CmsCategoryController::class, 'add']); 
+      Route::get('/admin/cms-category/listing',[CmsCategoryController::class, 'listing']);
+      Route::get('/admin/cms-category/delete/{id}',[CmsCategoryController::class, 'delete']);  
+      Route::get('/admin/cms-category/edit/{id}',[CmsCategoryController::class, 'edit']);   
+      Route::post('/admin/cms-category/update',[CmsCategoryController::class, 'update']);
 
+      // cms-subcategory
+      Route::get('/admin/cms-sub-category/add-view',[CmsSubCategoryController::class, 'addView']);
+      Route::post('/admin/cms-sub-category/add',[CmsSubCategoryController::class, 'add']); 
+      Route::get('/admin/cms-sub-category/listing',[CmsSubCategoryController::class, 'listing']);
+      Route::get('/admin/cms-sub-category/delete/{id}',[CmsSubCategoryController::class, 'delete']);
+      Route::get('/admin/cms-sub-category/edit/{id}',[CmsSubCategoryController::class, 'edit']);
+      Route::post('/admin/cms-sub-category/update',[CmsSubCategoryController::class, 'update']);
+
+      // cms-sub-sub-category
+      Route::post('/admin/get-cms-sub-category',[CmsSubSubCategoryController::class,'getCmsSubCategory']);
+      Route::get('/admin/cms-sub-sub-category/add-view',[CmsSubSubCategoryController::class, 'addView']);
+      Route::post('/admin/cms-sub-sub-category/add',[CmsSubSubCategoryController::class, 'add']);
+      Route::get('/admin/cms-sub-sub-category/listing',[CmsSubSubCategoryController::class, 'listing']);
+      Route::get('/admin/cms-sub-sub-category/delete/{id}',[CmsSubSubCategoryController::class, 'delete']);
+      Route::get('/admin/cms-sub-sub-category/edit/{id}',[CmsSubSubCategoryController::class, 'edit']);
+      Route::post('/admin/cms-sub-sub-category/update',[CmsSubSubCategoryController::class, 'update']);
+
+      // cms
+      Route::post('/admin/get-cms-sub-sub-category',[CmsController::class,'getSubSubCategory']);
+      Route::get('/admin/manage-cms/add-view',[CmsController::class,'addView']);
+      Route::post('/admin/manage-cms/add',[CmsController::class,'add']);
+      Route::get('/admin/manage-cms/list',[CmsController::class,'list']);
+      Route::get('/admin/manage-cms/edit/{id}',[CmsController::class,'edit']);
+      Route::post('/admin/manage-cms/update',[CmsController::class,'update']);
 });
+
+Route::get('activity-listing-front-end',[ActivityController::class, 'frontActivity']);
+Route::get('activity-details-front-end/{id}',[ActivityController::class, 'frontActivityDetails']);
+
+// landing-page
+Route::get('landing-page-data-get',[CmsController::class,'dataGet']);
+Route::post('landing-page-data-get/update',[CmsController::class,'dataUpdate']);
+
+
+// top-destination
+Route::post('top-destination-add',[TopDestinationController::class,'add']);
+Route::get('top-destination-listing',[TopDestinationController::class,'listing']);
+Route::get('top-destination-edit/{id}',[TopDestinationController::class,'edit']);
+Route::post('top-destination-update',[TopDestinationController::class,'update']);
+Route::get('top-destination-delete/{id}',[TopDestinationController::class,'delete']);
+
+
+
+
+
+///////////////////////////////////////////////////// master/////////////////////////////////////////////////////
+
+// regions
+Route::post('regions-add',[RegionController::class,'add']);
+Route::get('regions-listing',[RegionController::class,'listing']);
+Route::get('regions/edit/{id}',[RegionController::class,'edit']);
+Route::post('regions/update',[RegionController::class,'update']);
+Route::get('regions/delete/{id}',[RegionController::class,'delete']);
+
+// Dzongkhag
+Route::get('dzongkhag-add-view',[DzongkhagController::class,'addView']);
+Route::post('dzongkhag-add',[DzongkhagController::class,'add']);
+Route::get('dzongkhag-listing',[DzongkhagController::class,'listing']);
+Route::get('dzongkhag-edit/{id}',[DzongkhagController::class,'edit']);
+Route::post('dzongkhag-update',[DzongkhagController::class,'update']);
+Route::get('dzongkhag-delete/{id}',[DzongkhagController::class,'delete']);
+
+// dunkhag
+Route::get('dungkhag-add-view',[DunkhagController::class,'addView']);
+Route::post('dungkhag-add',[DunkhagController::class,'add']);
+Route::get('dungkhag-listing',[DunkhagController::class,'listing']);
+Route::get('dungkhag-edit/{id}',[DunkhagController::class,'edit']);
+Route::post('dungkhag-update',[DunkhagController::class,'update']);
+Route::get('dungkhag-delete/{id}',[DunkhagController::class,'delete']);
+
+// gewog
+Route::get('gewog-add-view',[GewogController::class,'addView']);
+Route::post('get-dungkhag-data',[GewogController::class,'getDunkhag']);
+Route::post('gewog-add',[GewogController::class,'add']);
+Route::get('gewog-listing',[GewogController::class,'listing']);
+Route::get('gewog-edit/{id}',[GewogController::class,'edit']);
+Route::get('gewog-delete/{id}',[GewogController::class,'delete']);
+Route::post('gewog-update',[GewogController::class,'update']);
+
+// village
+Route::get('village-add-view',[VillageController::class,'addView']);
+Route::post('get-gewog-data',[VillageController::class,'getGewog']);
+Route::post('village-add',[VillageController::class,'add']);
+Route::get('village-listing',[VillageController::class,'listing']);
+Route::get('village-edit/{id}',[VillageController::class,'edit']);
+Route::get('village-delete/{id}',[VillageController::class,'delete']);
+Route::post('village-update',[VillageController::class,'update']);
+
+
+
+// theme-category
+
+Route::post('theme-add',[ThemeController::class,'add']);
+Route::get('theme-listing',[ThemeController::class,'listing']);
+Route::get('theme-edit/{id}',[ThemeController::class,'edit']);
+Route::post('theme-update',[ThemeController::class,'update']);
+Route::get('theme-delete/{id}',[ThemeController::class,'delete']);
+
+// attraction-category
+Route::post('attraction-category-add',[AttractionCategory::class,'add']);
+Route::get('attraction-category-listing',[AttractionCategory::class,'listing']);
+Route::get('attraction-category-edit/{id}',[AttractionCategory::class,'edit']);
+Route::post('attraction-category-update',[AttractionCategory::class,'update']);
+Route::get('attraction-category-delete/{id}',[AttractionCategory::class,'delete']);
+
+
+
+////////////////////////////////////////////////// end-master/////////////////////////////////////////////////////
+
+// poi
+Route::get('poi-add-view',[PoiController::class,'addView']);
+Route::post('get-dzongkhag-data',[PoiController::class,'getDzongkhag']);
+Route::post('poi-add',[PoiController::class,'add']);
+Route::any('poi-listing',[PoiController::class,'listing']);
+Route::get('poi-edit/{id}',[PoiController::class,'edit']);
+Route::get('poi-delete/{id}',[PoiController::class,'delete']);
+Route::post('poi-update',[PoiController::class,'update']);
+Route::get('top-destination-poi',[PoiController::class,'topDestination']);
+Route::get('monument-poi',[PoiController::class,'monumentPoi']);
+
+// poi-image
+Route::post('poi-image-add',[PoiController::class,'imageAdd']);
+Route::get('poi-image-listing/{id}',[PoiController::class,'imageListing']);
+Route::get('poi-image-delete/{id}',[PoiController::class,'imageDelete']);
+
+// poi-video
+Route::post('poi-video-add',[PoiController::class,'videoAdd']);
+Route::get('poi-video-listing/{id}',[PoiController::class,'videoListing']);
+Route::get('poi-video-delete/{id}',[PoiController::class,'videoDelete']);
+
+// poi-close-date
+Route::post('poi-close-date',[PoiController::class,'dateAdd']);
+Route::get('poi-close-date/listing/{id}',[PoiController::class,'dateListing']);
+Route::get('poi-close-date/edit/{id}',[PoiController::class,'dateEdit']);
+Route::get('poi-close-date/update',[PoiController::class,'dateUpdate']);
+// header-image
+Route::post('header-image-add',[HeaderImage::class,'add']);
+Route::get('header-image-listing',[HeaderImage::class,'listing']);
+Route::get('header-image-edit/{id}',[HeaderImage::class,'edit']);
+Route::post('header-image-update',[HeaderImage::class,'update']);
+Route::get('header-image-delete/{id}',[HeaderImage::class,'delete']);
+
+
+    // event-category
+    Route::resource('index', App\Http\Controllers\Api\Event\EventCategoryControllroller::class);
+    Route::post('/category/{id}', [App\Http\Controllers\Api\Event\EventCategoryControllroller::class, 'update_2']);
+
+    // events
+    Route::resource('events', App\Http\Controllers\Api\Event\EventController::class);
+    Route::post('/events-data/{id}', [App\Http\Controllers\Api\Event\EventController::class, 'update_2']);
+
+    Route::post('/events-data-filter', [App\Http\Controllers\Api\Event\EventController::class, 'index_1']);
+    Route::get('/events-data/months', [App\Http\Controllers\Api\Event\EventController::class, 'months']);
+    Route::get('/events-data/years', [App\Http\Controllers\Api\Event\EventController::class, 'years']);
+    
+    Route::resource('daily-activities', App\Http\Controllers\Api\Event\DailyActivitiesController::class);
+    Route::post('/daily-activities-data/{id}', [App\Http\Controllers\Api\Event\DailyActivitiesController::class, 'update_2']);
+    
+    Route::resource('event-images', App\Http\Controllers\Api\Event\EventImageController::class);
+    Route::post('/event-image/{id}', [App\Http\Controllers\Api\Event\EventImageController::class, 'update_2']);
+    
+    Route::resource('event-videos', App\Http\Controllers\Api\Event\EventVideoController::class);
+    Route::post('/event-video/{id}', [App\Http\Controllers\Api\Event\EventVideoController::class, 'update_2']);
+
+
+    Route::resource('blog-categorys', App\Http\Controllers\BlogCategoryController::class);
+    Route::post('/blog-category/{id}', [App\Http\Controllers\BlogCategoryController::class, 'update_2']);
+
+    Route::resource('blog-posts', App\Http\Controllers\BlogPostController::class);
+    Route::post('/blog-post/{id}', [App\Http\Controllers\BlogPostController::class, 'update_2']);
+
+
+    // review
+    Route::post('post-review',[ReviewController::class,'postReview']);
+
+
+
+// activity-contact
+      Route::get('/admin/activity/contact-listing/{id}',[ActivityController::class, 'contactListing']);
+      Route::post('/admin/activity/contact-add',[ActivityController::class, 'contactAdd']);
+      Route::get('/admin/activity/contact-edit/{id}',[ActivityController::class, 'contactEdit']);
+      Route::post('/admin/activity/contact-update',[ActivityController::class, 'contactUpdate']);
+      Route::get('/admin/activity/contact-delete/{id}',[ActivityController::class, 'contactDelete']);
+
+
+ // front-end
+Route::get('all-region',[RegionController::class,'allRegion']);
+Route::get('region-details/{id}',[RegionController::class,'regionDetails']);   
+
+Route::get('dzongkhag-details/{id}',[RegionController::class,'dzongkhagDetails']);
+
+Route::get('frontend-blogs',[App\Http\Controllers\BlogPostController::class, 'showBlogs']);
+Route::get('frontend-blogs/details/{id}',[App\Http\Controllers\BlogPostController::class, 'showBlogsDetails']);
+
+Route::get('national-park',[PoiController::class,'nationalPark']);
+
+
+
+// activity-frontend-apis
+Route::get('activity-category-with-subcategory',[ActivityController::class, 'categoryFetch']);
+Route::get('activity-fetch-category/{id}',[ActivityController::class, 'categoryActivityFetch']);
+Route::get('activity-fetch-sub-category/{id}',[ActivityController::class, 'subCategoryActivityFetch']);
+
+
+Route::get('activity-fetch-region',[ActivityController::class, 'regionActivityFetch']);
+Route::get('activity-fetch-dzongkhag',[ActivityController::class, 'dzonkhagActivityFetch']);
+
+
+
+// cms-frontend
+Route::get('cms-category',[CmsController::class,'fetchCategory']);
+Route::get('cms-inner-category/{id}',[CmsController::class,'fetchInnerCategory']);
+Route::get('cms-fetch-via-category/{id}',[CmsController::class,'fetchCms']);
+
+
+// separate
+Route::post('hotel-category-add',[SeparateController::class,'categoryAdd']);
+Route::post('hotel-category-update',[SeparateController::class,'categoryUpdate']);
+
+Route::post('hotel-add',[SeparateController::class,'hotelAdd']);
+Route::post('hotel-update',[SeparateController::class,'hotelUpdate']);
+
+Route::post('tour-oparator-add',[SeparateController::class,'tourOparatorAdd']);
+Route::post('tour-oparator-update',[SeparateController::class,'tourOparatorUpdate']);
+
+Route::post('guide-add',[SeparateController::class,'guideAdd']);
+Route::post('guide-update',[SeparateController::class,'guideUpdate']);
+
+
+// user-management
+Route::get('manage-user-add-view',[UserManagementController::class,'addView']);
+Route::post('manage-user-add',[UserManagementController::class,'add']);
+Route::get('manage-user-listing',[UserManagementController::class,'listing']);
+Route::get('manage-user-edit/{id}',[UserManagementController::class,'edit']);
+Route::post('manage-user-update',[UserManagementController::class,'update']);
+Route::get('manage-user-delete/{id}',[UserManagementController::class,'delete']);
+Route::get('manage-user-status/{id}',[UserManagementController::class,'status']);
+
+Route::post('change-dzongkhag-get-data',[UserManagementController::class,'getPoi']);
+Route::post('change-category-get-data',[UserManagementController::class,'getHotel']);
